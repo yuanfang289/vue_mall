@@ -7,6 +7,9 @@ import Popup from './components/popup';
 import { Icon } from 'vant';
 import { Lazyload } from 'vant';
 import { Loading } from 'vant';
+import { Collapse, CollapseItem } from 'vant';
+
+
 import {localData, sessionData} from "./assets/js/storage.js";
 const debug = process.env.NODE_ENV !== 'production'
 Vue.prototype.localData = localData;
@@ -16,6 +19,8 @@ Vue.prototype.sessionData=sessionData;
 Vue.use(Icon);
 Vue.use(Lazyload);
 Vue.use(Loading);
+Vue.use(Collapse);
+Vue.use(CollapseItem);
 // 注册时可以配置额外的选项
 Vue.use(Lazyload, {
   lazyComponent: true

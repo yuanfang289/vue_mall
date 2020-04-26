@@ -10,6 +10,8 @@ import Exlist from '../pages/Exlist'
 
 import Success from '../pages/Success'
 
+import Coupon from '../pages/Coupon'
+
 Vue.use(Router)
 
 export default new Router({
@@ -36,6 +38,11 @@ export default new Router({
 	    path : '/success',
 	    name : 'Success',
 	    component :  Success
+	},
+	{
+	    path : '/coupon',
+	    name : 'Coupon',
+	    component :  Coupon
 	}
 ],
     mode: "hash"

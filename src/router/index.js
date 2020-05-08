@@ -12,6 +12,12 @@ import Success from '../pages/Success'
 
 import Coupon from '../pages/Coupon'
 
+import UseCoupon from '../pages/UseCoupon'
+
+import SelectCoupon from '../pages/SelectCoupon'
+
+import UselessCoupon from '../pages/UselessCoupon'
+
 Vue.use(Router)
 
 export default new Router({
@@ -42,7 +48,34 @@ export default new Router({
 	{
 	    path : '/coupon',
 	    name : 'Coupon',
-	    component :  Coupon
+	    component :  Coupon,
+		meta:{
+		   title:'优惠券'
+		}
+	},
+	{
+	    path : '/selectCoupon',
+	    name : 'SelectCoupon',
+	    component :  SelectCoupon,
+		meta:{
+		   title:'选择优惠券'
+		}
+	},
+	{
+		path : '/useCoupon',
+	    name : 'UseCoupon',
+	    component :  UseCoupon,
+		meta:{
+		   title:'使用优惠券'
+		}
+	},
+	{
+		path : '/uselessCoupon',
+	    name : 'UselessCoupon',
+	    component :  UselessCoupon,
+		meta:{
+		   title:'不可用优惠券'
+		}
 	}
 ],
     mode: "hash"

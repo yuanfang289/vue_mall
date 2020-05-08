@@ -1,6 +1,2 @@
-.gitignore
-dist/
-node_modules/
-*.zip
-package-lock.json
-
+dist
+node_modules

@@ -8,7 +8,7 @@
         <p>{{content}}</p>
         <div class="btn" @click="btnClick">{{btnText}}</div>
       </div>
-	  <div class="close" @click="show = false">
+	  <div class="close" @click="closed">
 		  <van-icon name="cross" size="0.4rem" color="#ffffff"/>
 	  </div>
     </div>
@@ -25,7 +25,8 @@ export default {
       title: '',		 //主标题
       content: '',      //内容
       btnText: '',      // button文案
-      click: ''         //按钮事件
+      click: '',        //按钮事件
+	  closeClick: '',   //关闭事件
     }
   },
   created () {
@@ -34,7 +35,11 @@ export default {
     btnClick () {
       this.click()
       this.show = false
-    }
+    },
+	closed() {
+		this.closeClick&&this.closeClick()
+		this.show = false
+	}
   }
 }
 </script>

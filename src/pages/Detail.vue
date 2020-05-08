@@ -70,7 +70,6 @@
 </template>
 
 <script>
-import { Toast } from 'vant';
 export default {
   name: 'Detail',
   props: {
@@ -121,16 +120,18 @@ export default {
 				    Toast(res.data.msg)
 			   }  
 		}).catch((error)=> {
-			   Toast('服务器错误')
+			   _.$toast('服务器错误')
 		});
 	},
 	exchange(){
 		let _ = this;
-		let obj = {
-			clickName:'底部兑换的点击',
-			data:_.info
-		}
-		_.wx.miniProgram.postMessage({ data: obj });
+          // 神策埋点：200421_商品详情页按钮点击
+          _.sensors.track('ClickButton', {
+            'event_name': '商品详情页按钮点击',
+            'product_id': _.info.id,
+            'product_name': _.info.name,
+            'button_name':'购买',
+          });
 		let num = _.info.paw_price - _.paw_num
 		if(num<=0){
 			_.$popup({
@@ -139,12 +140,19 @@ export default {
 				btnText: '确定兑换',
 				click: () => {
 					// 调用接口 获取data     
-					 _.exchangeApi()
-					 let obj = {
-					 	clickName:'确定兑换的点击',
-					 	data:_.info
-					 }
-					 _.wx.miniProgram.postMessage({ data: obj });
+					_.exchangeApi()
+					// 神策埋点：200421_兑换弹窗按钮点击
+					_.sensors.track('ClickInPopup', {
+						'event_name': '兑换弹窗按钮点击',
+						'button_name':'确定兑换',
+					});
+				},
+				closeClick: ()=>{
+					// 神策埋点：200421_兑换弹窗按钮点击
+					_.sensors.track('ClickInPopup', {
+						'event_name': '兑换弹窗按钮点击',
+						'button_name':'关闭',
+					});
 				}
 			})
 		}else{
@@ -154,14 +162,21 @@ export default {
 				btnText: '获取更多熊掌',
 				click: () => {
 					//跳转微信小程序页面  pages/ucenter/bear_paw
-					let obj = {
-						clickName:'获取更多熊掌的点击',
-						data:_.info
-					}
-					_.wx.miniProgram.postMessage({ data: obj });
+					  // 神策埋点：200421_点击获取更多熊掌
+					_.sensors.track('ClickInPopup', {
+						'event_name': '点击获取更多熊掌',
+						'button_name':'获取更多熊掌',
+					});
 					_.wx.miniProgram.navigateTo({
 						url: '/pages/ucenter/bear_paw'
 					})
+				},
+				closeClick: ()=>{
+					// 神策埋点：200421_兑换弹窗按钮点击
+					_.sensors.track('ClickInPopup', {
+						'event_name': '点击获取更多熊掌',
+						'button_name':'关闭',
+					});
 				}
 			})
 		}
@@ -175,13 +190,14 @@ export default {
 			  	  name: 'Success',
 			  	  query:{           
 			  	    orderId:res.data.data.order_id, 
+					distinct_id:_.localData("get","distinct_id")
 			  	  }
 			  	})
 			  }else{
-			  	 Toast(res.data.msg);
+				_.$toast(res.data.msg)
 			  }
 		}).catch( (error)=> {
-			    Toast('服务器错误')
+			    _.$toast('服务器错误')
 		});
 	}
   }

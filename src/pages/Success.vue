@@ -9,7 +9,7 @@
 			<div class="tit">兑换成功！</div>
 		</div>
 		<div class="name van-hairline--bottom">
-			- {{detail.goods_name}} -<br>{{detail.order_id}}
+			- {{detail.goods_name}} -<br>订单id：{{detail.order_id}}
 		</div>
 <!-- 		<div class="orderid"> 
 			
@@ -21,6 +21,7 @@
 			  {{detail.bottom_text}}  <!-- 截图扫码前往白熊学院小程序学习 -->
 		</div>
 	</div>
+	<div class="" style="height: 0.8rem;"></div>
   </div>
 </template>
 

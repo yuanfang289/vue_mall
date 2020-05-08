@@ -9,6 +9,12 @@ export default {
   name: 'app',
   components: {
     
+  },
+  created() {
+  	    let _ = this;
+  		console.log(_.$route.query);
+  },
+  methods:{
   }
 }
 </script>

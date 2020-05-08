@@ -14,7 +14,7 @@
 					</div>
 				</div>
 			</div>
-			<router-link  :to="'/exlist'" class="right">
+			<router-link  :to="'/exlist?distinct_id='+distinct_id" class="right">
 				<span style="margin-right: 2px;">兑换记录</span><van-icon name="arrow" />
 			</router-link>
 		</div>
@@ -26,26 +26,22 @@
 		    @load="getGoodsList"
 		  >
 		  <div class="list">
-			<template v-for="item in list">
-				<div class="item" @click="goDetail(item)">  
-					<img :src="item.pic_url" />
-					<div class="p">
-						<p>
-							{{item.name}}
-						</p>
-					</div>
-					<div class="price">
-						<img class="paw_icon" src="https://oss.icebear.me/static/image/icon/paw_icon.png"/>
-						<span>{{item.paw_price}}</span>
-					</div>
+			<div v-for="item in list" class="item" @click="goDetail(item)">  
+				<img :src="item.pic_url" />
+				<div class="p">
+					<p>
+						{{item.name}}
+					</p>
 				</div>
-			</template>
-			<template v-if="list.length==0">
-				<div class="nodata">
-				   <img :src="nodataimg"/>
-				   <p>今日商品已售馨，请明日再来~</p>
+				<div class="price">
+					<img class="paw_icon" src="https://oss.icebear.me/static/image/icon/paw_icon.png"/>
+					<span>{{item.paw_price}}</span>
 				</div>
-			</template>
+			</div>
+			<div v-if="list.length==0" class="nodata">
+			   <img :src="nodataimg"/>
+			   <p>今日商品已售馨，请明日再来~</p>
+			</div>
 		  </div>
 		  </van-list>
 		<!-- </van-pull-refresh> -->
@@ -55,7 +51,6 @@
 <script>
 	import { List } from 'vant';
 	import { PullRefresh } from 'vant';
-	import { Toast } from 'vant';
 	export default {
 		components: {
 			 [List.name]: List,
@@ -85,8 +80,9 @@
 		let _ = this;
 		_.token = _.$route.query.token;
 		_.localData("set","token",_.token); 
-		// _.localData("set","icebearappid",_.$route.query.appid); 
-		_.getUserInfo()
+		_.distinct_id = _.$route.query.distinct_id;
+		_.localData("set","distinct_id",_.distinct_id); 
+		_.getUserInfo();
 	  },
 	  methods:{
 		getUserInfo(){  
@@ -124,20 +120,21 @@
 		  // 将 loading 设置为 true，表示处于加载状态
 		  this.loading = true;
 		  this.getGoodsList();
-		  Toast('刷新成功');
+		  this.$toast('刷新成功');
 		},
 		goDetail(item) {
-			console.log(item);
 			let _ = this;
-			let obj = {
-				clickName:'商品的点击',
-				data:item
-			}
-			_.wx.miniProgram.postMessage({ data: obj });
+			// 神策埋点：200421_点击查看商品详情
+			_.sensors.track('ClickViewProductDetail', {
+			  'event_name': '点击查看商品详情',
+			  'product_id': item.id,
+			  'product_name': item.name
+			});
 			_.$router.push({
 			  name: 'Detail',
 			  query:{           
 			    id:item.id, 
+				distinct_id:_.localData("get","distinct_id")
 			  }
 			})
 		}
@@ -210,6 +207,8 @@
 			align-items: center;
 			justify-content: space-between;
 			padding-top: 0.41rem;
+			padding-bottom: constant(safe-area-inset-bottom); /* 兼容 iOS < 11.2 */
+		  	padding-bottom: env(safe-area-inset-bottom); /* 兼容 iOS >= 11.2 */
 			.item{
 				width: 3.2rem;
 				height: 4.06rem;

@@ -1,39 +1,48 @@
 <template>
   <div class="coupon">
 	<div class="list">
-		<div class="item" v-for="item in list">
-			<div v-show="item.checked" class="checked_box">
-				<div class="cheked"></div>
-				<div class="checked_icon"><van-icon size="0.16rem" name="success" /></div>
-			</div>
-			<div class="cou_info" @click="checkedClick(item)">
-				<div class="info">
-					<div class="price">
-						<div class="rel_price">
-							<span>¥</span>{{item.price}}
+		<van-pull-refresh v-model="refreshing" @refresh="onRefresh">
+		  <van-list
+		    v-model="loading"
+		    :finished="finished"
+		    finished-text=" "
+		    @load="getCouponList"
+		  >
+			<div class="item" v-for="item in list">
+				<div v-show="item.checked" class="checked_box">
+					<div class="cheked"></div>
+					<div class="checked_icon"><van-icon size="0.16rem" name="success" /></div>
+				</div>
+				<div class="cou_info" @click="checkedClick(item)">
+					<div class="info">
+						<div class="price">
+							<div class="rel_price">
+								<span>¥</span>{{item.coupon_value}}
+							</div>
+							<div class="mj van-ellipsis">
+								满{{item.use_threshold}}元可用
+							</div>
 						</div>
-						<div class="mj van-ellipsis">
-							满200元可用
+						<div class="expl">
+							<div class="txt van-multi-ellipsis--l2">{{item.title}}</div>
+							<div class="date">{{item.code_end_time}} 到期</div>
 						</div>
-					</div>
-					<div class="expl">
-						<div class="txt van-multi-ellipsis--l2">全场通用</div>
-						<div class="date">2020.04.25 23:59 到期</div>
 					</div>
 				</div>
-			</div>
-			<ell-more v-bind:value='item.tips'></ell-more>
+				<ell-more v-bind:value='item.rule_desc' v-bind:value1='item.usage_desc' v-bind:value2='item.coupon_code' v-bind:bgColor='bgColor'></ell-more>
 		</div>
+		  </van-list>
+		</van-pull-refresh>
 	</div>
 	
-		<router-link  :to="'/uselessCoupon?id=111'" class="cannotcoupon">
+		<router-link  :to="'/uselessCoupon?orderId='+orderId" class="cannotcoupon">
 			<span style="margin-right: 2px;">查看不可用券</span><van-icon name="arrow" />
 		</router-link>
 	
 	<div class="kong"></div>
 	<div class="footer_fixed">
 		<div class="txt van-ellipsis">
-			{{ checkedItem?'￥'+checkedItem.price:'未选择优惠券'}}
+			{{ checkedItem?'￥'+checkedItem.coupon_value:'未选择优惠券'}}
 		</div>
 		<div class="butn" @click="sure">
 			确定
@@ -44,9 +53,13 @@
 
 <script>
 	import ellMore from '../components/ellMore.vue';
+	import { List } from 'vant';
+	import { PullRefresh } from 'vant';
 export default {
   components: {  
-	ellMore
+	ellMore,
+	[List.name]: List,
+	[PullRefresh.name]: PullRefresh
   },
   name: 'SelectCoupon',
   props: {
@@ -55,58 +68,123 @@ export default {
   data(){
   	return{
 		checkedItem:null,
-		list:[{
-			id:0,
-			checked:false,
-			price:333,
-			tips:'暗杀是对哈苏 啊速度哈速度爱'
-		},{
-			id:1,
-			checked:false,
-			price:666,
-			tips:'暗杀是对哈苏 啊速度哈速度爱上对哈速度和啊u深度哈师大u哈随电话阿哈随电话阿松大哈随电话阿松大哈随电话阿松大哈随电话阿松大哈随电话阿松大松大iu阿史笃会阿松大啊u刷刷的'
-		},{
-			id:2,
-			checked:false,
-			price:999,
-			tips:'暗杀是对哈苏 啊速度哈速度爱上对哈速度和啊u深度哈师大u哈随电话阿松大iu阿史笃会阿松大啊u刷刷的'
-		}]
+		list:[],
+		loading: false,
+		finished: false,
+		refreshing: false,
+		page:1,
+		page_size:10
   	};
   },
   created() {
 	    let _ = this;
 	    _.orderId = _.$route.query.orderId;
+		_.couponCode = _.$route.query.couponCode;
 		_.token = _.localData("get","token");
 		_.fromUrl = _.$route.query.url;
+		// _.getCouponList();
   },
   watch:{
 		list:function(){
 			var result = this.list.filter((obj)=> {
 				return obj.checked
 			});
-			this.valueText = result.id
+			this.valueText = result.coupon_code
 		},
   },
   methods: {
+	  getCouponList(){
+		  let _ = this;
+		  _.$axios.post('/index/coupon_code/order_coupon_code',{order_id:_.orderId,status:1,pageSize:_.page_size,page:_.page}).then(
+		   function (res) {
+			      console.log(res);
+			   if(res.data.code){
+				   let list = res.data.data.list;
+				   list.map((obj)=>{
+					if(obj.coupon_code === _.couponCode){
+						obj.checked = true;
+						 _.checkedItem = obj
+					}else{
+						obj.checked = false
+					}
+				   })
+				   
+				   if(list.length>0){
+					   _.list = _.list.concat(list)
+					   _.page++
+					};
+				   	_.loading = false;// 加载状态结束
+				   	_.refreshing = false; //下拉加载状态结束
+				   if(list.length<_.page_size){
+						_.finished = true;
+				   }
+			   }else{
+				   _.loading = false;// 加载状态结束
+				   _.refreshing = false; //下拉加载状态结束
+				   _.finished = true;
+				   _.$toast(res.data.msg) 
+			   }
+		  }).catch(
+		   function (error) {
+		  });
+	  },
+	  onRefresh() {
+	    let _ = this;
+	    // 清空列表数据
+	    _.finished = false;
+	    _.list = [];
+	    _.page = 1
+	    // 重新加载数据
+	    // 将 loading 设置为 true，表示处于加载状态
+	    _.loading = true;
+	    _.getCouponList();
+	    _.$toast('刷新成功');
+	  },
 	  checkedClick(item){
 		  let _ = this;
+		  let txt = '选择优惠券'
 		  if(item.checked){
-			  _.checkedItem = null
+			  _.checkedItem = null;
+			  txt = '取消优惠券'
 		  }else{
 			  _.checkedItem = item
 		  }
 		  !item.checked&&_.list.map((obj,idx)=>{
-		  			  obj.checked = false
+		  	 obj.checked = false
 		  })
 		  item.checked = !item.checked
+		 
+		  // 神策埋点：200513_点击选择优惠券
+		  _.sensors.track('Mini_College_ClickChooseCoupon', {
+		    'event_name': '点击选择优惠券',
+		    'coupon_id': item.coupon_code+'',
+		    'button_name': txt,
+		  });
 	  },
 	  sure(){
 		  let _ = this;
+		  console.log('点击确定')
+		  // 神策埋点：200513_点击选择优惠券
+		  _.sensors.track('Mini_College_ClickChooseCoupon', {
+		    'event_name': '点击选择优惠券',
+		    'coupon_id': _.checkedItem.coupon_code+'',
+		    'button_name': '确定优惠券',
+		  });
 		  if(_.checkedItem){
 			  console.log(_.fromUrl)
-			  window.location.href = _.fromUrl+'&couponPrice='+_.checkedItem.price+'&couponId='+_.checkedItem.id
+			  _.$axios.post('/index/coupon_code/check_coupon_code',{coupon_code:_.checkedItem.coupon_code,token:_.token}).then(
+			   function (res) {
+				   if(res.data.code){
+					  window.location.href = _.fromUrl+'&couponPrice='+_.checkedItem.price+'&couponCode='+_.checkedItem.coupon_code
+				   }else{
+					   _.$toast(res.data.msg) 
+				   }
+			  }).catch(
+			   function (error) {
+				   _.$toast('网络错误') 
+			  });
 		  }else{
-			   this.$toast('请选择优惠券') 
+			   _.$toast('请选择优惠券') 
 		  } 
 	  }
   },

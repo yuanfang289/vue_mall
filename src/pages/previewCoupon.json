@@ -1,0 +1,24 @@
+{
+    "activity": {
+        "desc": "1.此券适用连报课程，使用前请咨询班主任\n2.仅限白熊vip使用\n3.使用后产生退款不退还优惠券",
+        "cover": "https://oss.icebear.me/static/image/h5/coupon_bg.png"
+    },
+    "list": [
+        { 
+            "coupon_title": "标题", 
+            "coupon_value": 100,  
+            "use_threshold": 150, 
+            "rule_desc": "使用规则说明", 
+            "time_desc": "2020-05-30 15:43:15到期", 
+            "usage_desc":"适用范围说明" 
+        },
+        {
+            "coupon_title": "标题",
+            "coupon_value":1.1,
+            "use_threshold": 5.9,
+            "rule_desc": "使用规则说明",
+            "time_desc": "领取后2年有效",
+            "usage_desc":"适用范围说明" 
+        }
+    ]
+}

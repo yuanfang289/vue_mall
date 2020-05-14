@@ -36,8 +36,12 @@ See [Configuration Reference](https://cli.vuejs.org/config/).
  
 ###   发布打包 
 1,npm run build 生成的dist目录
-2,更改dist目录下的index.html中的代码         =/css  --->  =/static/shop/css    (整个index.html文件中替换)  
+<!-- node脚本替换 -->
+2,npm run copy  替换dist资源到pc对应的目录 
+
+### copy_to_pc.js node脚本的工作内容说明 
+1,更改dist目录下的index.html中的代码         =/css  --->  =/static/shop/css    (整个index.html文件中替换)  
 				                          =/js  --->  =/static/shop/js    (整个index.html文件中替换)
-3，把dist下的文件复制到pc的shop文件下
+2，把dist下的文件复制到pc的shop文件下
 css ，js  文件夹      替换到           pc\public\static\shop    下   
 index.html           替换到           pc\application\h5\view\shop   下  

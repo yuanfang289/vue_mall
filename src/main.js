@@ -9,6 +9,7 @@ import { Icon } from 'vant';
 import { Lazyload } from 'vant';
 import { Loading } from 'vant';
 import { Toast } from 'vant';
+import { Dialog } from 'vant';
 import { Empty } from 'vant';
 
 import {localData, sessionData} from "./assets/js/storage.js";
@@ -25,6 +26,7 @@ Vue.use(Icon);
 Vue.use(Lazyload);
 Vue.use(Loading);
 Vue.use(Toast);
+Vue.use(Dialog);
 Vue.use(Empty);
 
 // 注册时可以配置额外的选项
@@ -57,7 +59,6 @@ router.beforeEach((to,from,next)=>{
 	}else{
 		document.title = '熊掌商城'
 	}
-		
 	next()
 	sensors.quick('autoTrack');
 	sensors.registerPage({
@@ -66,7 +67,7 @@ router.beforeEach((to,from,next)=>{
 	   app_name:"熊掌商城h5",
 	   app_id:"",
 	})
-	sensors.login(getUrlParam('distinct_id'));
+	sensors.login(getUrlParam('distinct_id','hash'));
 })
 Vue.use(router);
 new Vue({

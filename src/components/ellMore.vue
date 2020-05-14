@@ -1,13 +1,31 @@
 <template>
-	<div class="cou_ex van-hairline--top" @click.capture="wrapper($event)">
+	<div class="cou_ex" @click.capture="wrapper($event)">
 		<div class="ellipsis" style="opacity:1;">
-			{{value}}
+			<div v-if="value" class="tip ell">
+			  <span>使用说明：</span><span class="tipinfo">{{value}}</span>
+			</div>
+			<div v-if="value1" class="tip ell">
+			  <span>使用范围：</span><span class="tipinfo">{{value1}}</span>
+			</div>
+			<div v-if="value2" class="tip ell">
+			  <span>券编号：</span><span class="tipinfo">{{value2}}</span>
+			</div>
 		</div>
-		<div class="tips" style="opacity:0;">
-			{{value}}
+
+		<div class="tips"  style="opacity:0;">
+			<div v-if="value" class="tip">
+			  <span>使用说明：</span><span class="tipinfo">{{value}}</span>
+			</div>
+			<div v-if="value1" class="tip">
+			  <span>使用范围：</span><span class="tipinfo">{{value1}}</span>
+			</div>
+			<div v-if="value2" class="tip">
+			  <span>券编号：</span><span class="tipinfo">{{value2}}</span>
+			</div>
 		</div>
 		<div class="icon">
-		</div>
+		</div> 
+		<span class="before" :style="{backgroundColor:bgColor}"></span><span class="after" :style="{backgroundColor:bgColor}"></span>
 	</div>
 </template>
 
@@ -19,9 +37,21 @@ export default {
   name: 'EllMore',
   props: {
 	value: {
-      type: String,
-      default: 'hello world'
-    }
+      type: String | Number,
+      default: ''
+    },
+	value1: {
+	  type: String | Number,
+	  default: ''
+	},
+	value2: {
+	  type: String | Number,
+	  default: ''
+	},
+	bgColor: {
+		type: String,
+		default: '#fafafa'
+	}
   },
   data(){
   	return{
@@ -34,31 +64,17 @@ export default {
   methods: {
 	  wrapper (e){
 		console.log(e);
-		let ellipsis = '',
-			tips = '',
-			height = '',
-			icon = '';
-		if(e.target.className.indexOf('ellipsis') > -1){
-			ellipsis = e.target;
-			tips = e.target.nextSibling;
-			icon = tips.nextSibling;
-			height = tips.scrollHeight;
-		}else if(e.target.className.indexOf('tips') > -1){
-			tips = e.target;
-			ellipsis = tips.previousSibling;
-			icon = e.target.nextSibling;
-			height = tips.scrollHeight;
-		}else  if(e.target.className.indexOf('icon') > -1){
-			icon = e.target;
-			tips = icon.previousSibling;
-			ellipsis = tips.previousSibling;
-			height = tips.scrollHeight;
-		}else{
-			icon = e.target.lastElementChild;
-			tips = icon.previousSibling;
-			ellipsis = tips.previousSibling;
-			height = tips.scrollHeight;
-		}
+		
+		let obj = e.path.filter((obj)=>{
+			return obj.className == "cou_ex"
+		})
+		let target = obj[0];
+		console.log(target);
+		
+		let ellipsis = target.children[0],
+			tips = target.children[1],
+			height = target.children[1].scrollHeight,
+			icon = target.children[2];
 		if(ellipsis.style.opacity == '0'){
 			tips.style.opacity = '0';
 			ellipsis.style.opacity = '1';
@@ -84,10 +100,39 @@ export default {
 		box-shadow: 0 1px 6px 0 rgba(0, 0, 0, 0.04);
 		background-color: #fafafa;
 		position: relative;
+		border-radius: 0 0 0.12rem 0.12rem;
+		.after {
+		  content: '';
+		  width: 0.12rem;
+		  height: 0.12rem;
+		  border: 1px solid transparent;
+		  z-index: 1;
+		  background: transparent;
+		  position: absolute;
+		  right: -1px;
+		  top: -1px;
+		  border-radius: 0px 0px 0px 0.12rem;
+		  // border-bottom: 1px solid #e8e8e8;
+		  // border-left: 1px solid #e8e8e8;
+		  box-shadow: 0 1px 6px 0 rgba(0, 0, 0, 0.04);
+		}
+		.before {
+		  content: '';
+		  width: 0.12rem;
+		  height: 0.12rem;
+		  border: 1px solid transparent;
+		  z-index: 1;
+		  background: transparent;
+		  position: absolute;
+		  left: -1px;
+		  top: -1px;
+		  border-radius: 0px 0px 0.12rem 0px;
+		  // border-bottom: 1px solid #e8e8e8;
+		  // border-right: 1px solid #e8e8e8;
+		  box-shadow: 0 1px 6px 0 rgba(0, 0, 0, 0.04);
+		}
 		.ellipsis{
 			overflow: hidden;
-			text-overflow:ellipsis;
-			white-space: nowrap;
 			position: absolute;
 			top: 0;
 			left: 0;
@@ -98,6 +143,11 @@ export default {
 			color: #bcbcbc;
 			padding: 0.24rem 0.86rem 0.24rem 0.3rem;
 			line-height: 1.5;
+			.ell{
+				overflow: hidden;
+				text-overflow:ellipsis;
+				white-space: nowrap;
+			}
 		}
 		.tips{
 			height: 0.80rem;
@@ -107,6 +157,13 @@ export default {
 			line-height: 1.5;
 			transition: height 0.2s linear;
 			overflow: hidden;
+			word-break: break-all;
+			.tip{
+				display: flex;
+				.tipinfo{
+					flex: 1;
+				}
+			}
 		}
 		.icon{
 			position: absolute;

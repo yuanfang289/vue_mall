@@ -1,16 +1,15 @@
 <template>
     <div class="listBox" :class="courseData.length ==0 ? 'h100' : ''">
-        <van-pull-refresh v-model="refreshing" @refresh="onRefresh">
+        <!-- <van-pull-refresh v-model="isRefresh" @refresh="onRefresh"> -->
             <van-empty v-if="courseData.length ==0" class="emptyImg" image="https://oss.icebear.me/static/image/empty.png" description="暂无适用的课程"></van-empty>
             <van-list
                 v-else
-                v-model="loading"
-                :finished="finished"
+                v-model="isload"
+                :finished="isfinished"
                 finished-text="没有更多了"
-                @load="loadData"
                 >
                 <div class="couponTips">
-                    以下课程可使用满【200】减【100】的优惠券
+                    {{tips}}
                 </div>
                 <div v-for="(tiyan, index) in courseData" :key="index">
                     <div v-for="(lesson, index) in tiyan.lessons" :key="index">
@@ -89,13 +88,13 @@
                     </div>
                 </div>
             </van-list>
-        </van-pull-refresh>
+        <!-- </van-pull-refresh> -->
     </div>
 </template>
 
 <script>
 	import { List } from 'vant';
-	import { PullRefresh } from 'vant';
+	// import { PullRefresh } from 'vant';
     export default {
         props: {
             list:{
@@ -103,31 +102,64 @@
             },
             type:{
                 type: String
+            },
+            tips:{
+                type: String
+            },
+            isload:{
+                type: Boolean
+            },
+            // isrefresh:{
+            //     type: Boolean
+            // },
+            isfinished:{
+                type: Boolean
             }
         },
         components: {
             [List.name]: List,
-            [PullRefresh.name]: PullRefresh
+            // [PullRefresh.name]: PullRefresh
 		},
         data() {
             return {
                 courseData: this.list,
-                loading: false,
-                finished: false,
-                refreshing: false,
-                from: ''
+                from: '',
+                isLoading: this.isload,
+                // isRefresh: this.isrefresh,
+                isFinished: this.isfinished,
             }
         },
         computed: {
             switchList: function(){
                 return this.list
+            },
+            switchload: function(){
+                return this.isload
+            },
+            // switchRefresh: function(){
+            //     return this.isrefresh
+            // },
+            switchFinished: function(){
+                return this.isfinished
             }
         },
         watch: {
             list (newV, oldV) { // watch监听props里数据的变化，然后执行操作
                 let _ = this;
                 _.courseData = newV
-            }
+            },
+            isload (newV, oldV) { // watch监听props里数据的变化，然后执行操作
+                let _ = this;
+                _.isLoading = newV
+            },
+            // isrefresh (newV, oldV) { // watch监听props里数据的变化，然后执行操作
+            //     let _ = this;
+            //     _.isRefresh = newV
+            // },
+            isfinished (newV, oldV) { // watch监听props里数据的变化，然后执行操作
+                let _ = this;
+                _.isFinished = newV
+            },
         },
         created() {
             let _ = this;
@@ -145,31 +177,19 @@
                         url: '/pages/academy/detail?id='+e.id
                     })
                 }else{
-                    let url="https://open.weixin.qq.com/connect/oauth2/authorize?appid=wxf7d4480ea26c9dd3&redirect_uri=https%3A%2F%2Fdev.icebear.me%2Findex%2Fwechatpay%2Fwechat_login_reg%3Flesson_title_en%3Dzhiyeguihua2020&response_type=code&scope=snsapi_userinfo&state=12345#wechat_redirect"
-                    window.location.href= e.url ? e.url : url
+                    window.location.href= window.location.origin+'/wechatpay/lesson_detail/'+e.title_en
                 }
             },
             // 加载数据
             loadData(){
                 let _ = this;
-                setTimeout(()=>{
-                    if (this.refreshing) {
-                        // this.list = [];
-                        this.refreshing = false;
-                    }
-                    this.loading = false;
-                    this.finished = true;
-                },200)
+                _.$emit('loadmore',false)
             },
-            //下拉加载
-            onRefresh() {
-                // 清空列表数据
-                this.finished = false;
-                // 重新加载数据
-                // 将 loading 设置为 true，表示处于加载状态
-                this.loading = true;
-                this.loadData();
-            },
+            // //下拉加载
+            // onRefresh() {
+            //     let _ = this;
+            //     _.$emit('refresh',false)
+            // },
         },
     }
 </script>
@@ -385,7 +405,8 @@
     }
     .listBox{
         width: 100%;
-        padding: 60px 20px 0 20px;
+        height: 100%;
+        padding: 60px 20px 50px 20px;
         box-sizing: border-box;
     }
     .h100,

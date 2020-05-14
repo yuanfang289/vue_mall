@@ -1,19 +1,16 @@
 <template>
     <div class="couponBox" id="app">
         <template v-if="!pageLoading">
-            <van-tabs @click="clickTab" color="#ffcc2d" line-width="70" line-height="3">
-                <van-tab title="体验营" id="0">
+            <van-tabs @click="clickTab" v-model="tabId" color="#ffcc2d" line-width="70" line-height="3">
+                <van-tab v-for="(item, index) in tabs" :key="index" :title="item.name" :id="item.id">
                     <div class='container' :style="{height: clientHeight+'px'}">
-                        <div ref="tiyan" class="scrollView" :scrollTop="tiyanTop" @scroll="changeScroll($event)">
-                            <courseItem :list="tiyanList" type="tiyanying"></courseItem>
-                        </div>
-                    </div>
-                    
-                </van-tab>
-                <van-tab title="训练营" id="1">
-                    <div class='container' :style="{height: clientHeight+'px'}">
-                        <div ref="hangye" class="scrollView" :scrollTop="hangyeTop" @scroll="changeScroll($event)">
-                            <courseItem :list="xunlianList" type="hangyeke"></courseItem>
+                        <div ref="tabRef" class="scrollView" :scrollTop="tabId == 0 ? tiyanTop : hangyeTop" @scroll="changeScroll($event)">
+                            <courseItem 
+                            :list="tabId == 0 ? tiyanList : xunlianList" 
+                            :tips="couponTips" 
+                            :type="tabId == 0 ? 'tiyanying' : 'hangyeke'"
+                            :isload="isLoading"
+                            :isfinished="isFinished"></courseItem>
                         </div>
                     </div>
                 </van-tab>
@@ -51,20 +48,27 @@
                     {id:0,type: 'tiyanying',name:'体验营',checked:false},
                     {id:1,type: 'hangyeke',name:'训练营',checked:false}
                 ],
+                couponTips:'',
                 tiyanTop: 0,    //体验营滚动位置
                 hangyeTop: 0,   //训练营滚动位置
                 tiyanPage: 1,
                 hangyePage: 1,
-                from:''
+                from:'',
+                couponCode: '',
+
+                isLoading: false,
+                isFinished: false,
+                // isRefresh: false,
             };
         },
         created() {
             let _ = this;
-            // console.log('token   '+ _.localData("get","token"))
-            _.token = '298004514274e1f8cc14c1cc0d554ec6';//_.localData("get","token");
-            _.getList('tiyanying')
+            console.log(_.$route.query)
+            _.token = _.localData("get","token");
+            _.couponCode= _.$route.query.coupon_code;
+            _.getCouponLessons('tiyanying')
             setTimeout(()=>{
-                _.getList('hangyeke')
+                _.getCouponLessons('hangyeke')
             },300)
             sessionStorage.removeItem('tiyanTop')
             sessionStorage.removeItem('hangyeTop')
@@ -80,7 +84,8 @@
                     _.type='tiyanying';
                     var tiyanOffset = sessionStorage.getItem("tiyanTop") ? sessionStorage.getItem("tiyanTop") : 0;
                     _.$nextTick(() =>{
-                        _.$refs.tiyan.scrollTo(0,tiyanOffset)
+                        // _.$refs.tiyan.scrollTo(0,tiyanOffset)
+                        _.$refs.tabRef[0].scrollTo(0,tiyanOffset)
                     })
                 }else{
                     _.tabs[0].checked = false;
@@ -88,33 +93,54 @@
                     _.type='hangyeke';
                     var hangyeOffset = sessionStorage.getItem("hangyeTop") ? sessionStorage.getItem("hangyeTop") : 0;
                     _.$nextTick(() =>{
-                        _.$refs.hangye.scrollTo(0,hangyeOffset)
+                        // _.$refs.hangye.scrollTo(0,hangyeOffset)
+                        _.$refs.tabRef[1].scrollTo(0,hangyeOffset)
                     })
                 }
             },
-            // 获取数据
-            getList: function(type){
+            // 根据券码获取适用课程
+            getCouponLessons: function(type){
                 let _ = this;
-                _.$axios.post('/api/get_lesson_list', {token: _.token,name: type,sub_tag_name: ''}).then((res)=> {
+                _.$axios.post('/api/coupon_code/get_coupon_use_lessons', {
+                    token: _.token,
+                    name: type,
+                    coupon_code: _.couponCode,
+                    scence: _.$route.query.from == 'mini' ? 'mini' : 'h5'
+                }).then((res)=> {
                     if(res.data.code == 1){
                         let resData= res.data.data;
+                        _.couponTips= resData.coupon.coupon_tips_txt;
                         if(type == 'tiyanying'){
-                            _.tiyanList= resData.sub_category.length > 0 ? _.tiyanList.concat(resData.sub_category) : _.tiyanList;
+                            _.tiyanList= resData.sub_category;
                             _.pageLoading= false;
-                            _.tabs[0].checked= resData.sub_category.length > 0 && _.tiyanPage == 1 ? true : false;
+                            // _.tabs[0].checked= resData.sub_category.length > 0 && _.tiyanPage == 1 ? true : false;
                             _.tabId= resData.sub_category.length > 0 && _.tiyanPage == 1 ? 0 : 1;
+                            if(_.isRefresh){
+                                _.tabId= 0
+                            }else{
+                                _.tabId= _.tiyanList.length ==0 && resData.sub_category.length > 0 && _.hangyePage == 1 ? 1 : 0
+                            }
                         }else{
-                            _.xunlianList= resData.sub_category.length > 0 ? _.xunlianList.concat(resData.sub_category) : _.xunlianList;
+                            _.xunlianList= resData.sub_category;
                             _.pageLoading= false;
-                            _.tabs[1].checked= _.tiyanList.length ==0 && resData.sub_category.length > 0 && _.hangyePage == 1 ? true : false;
-                            _.tabId= _.tiyanList.length ==0 && resData.sub_category.length > 0 && _.hangyePage == 1 ? 1 : 0
+                            // _.tabs[1].checked= _.tiyanList.length ==0 && resData.sub_category.length > 0 && _.hangyePage == 1 ? true : false;
+                            if(_.isRefresh){
+                                _.tabId= resData.sub_category.length > 0 && _.hangyePage == 1 ? 1 : 0
+                            }else{
+                                _.tabId= _.tiyanList.length ==0 && resData.sub_category.length > 0 && _.hangyePage == 1 ? 1 : 0
+                            }
+                            // _.tabId= _.tiyanList.length ==0 && resData.sub_category.length > 0 && _.hangyePage == 1 && _.isRefresh ? 1 : 0
                         }
+                        _.isFinished = true;
+                        // _.isRefresh = false;
+                        _.isLoading = false;
                     }else{
                         _.$toast(res.data.msg)
+                        _.isFinished = true;
+                        // _.isRefresh = false;
+                        _.isLoading = false;
                     }
-                }).catch( (error)=> {
-                        _.$toast('服务器错误')
-                });
+                })
             },
             // 保存滚动位置
             changeScroll: function(e){
@@ -128,6 +154,21 @@
                         _.hangyeTop= e.target.scrollTop;
                     }
                 }
+            },
+            // 加载数据
+            loadData(){
+                let _ = this;
+                let type= _.tabId == 0 ? 'tiyanying' : 'hangyeke';
+                _.getCouponLessons(type)
+            },
+            //下拉加载
+            onRefresh() {
+                let _ = this;
+                _.isFinished = false;
+                _.isRefresh = true; //下拉加载状态结束
+                _.isLoading = true;
+                _.loadData();
+                _.$toast('刷新成功');
             },
             // 截取url
             getQueryString (name) { 
@@ -152,7 +193,7 @@
             .scrollView{
                 height: 100%;
                 overflow-y: scroll;
-                padding-bottom: 50px;
+                // padding-bottom: 50px;
             }
         }
         /deep/ .van-tabs{

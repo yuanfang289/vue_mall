@@ -21,6 +21,7 @@ module.exports = {
 	  console.log("本地开发")
     } else {
       // 生产开发配置
+	  console.log("生产开发")
     }
  },
  // vue-loader 配置项
@@ -28,7 +29,7 @@ module.exports = {
  // vueLoader: {},
  
  // 生产环境是否生成 sourceMap 文件
- productionSourceMap: true,
+ productionSourceMap: false,
  // css相关配置 配置高于chainWebpack中关于css loader的配置
  css: {
   // 是否使用css分离插件 ExtractTextPlugin
@@ -60,6 +61,7 @@ module.exports = {
   proxy: { // 设置代理
 	'/api': {
 		target: 'https://dev.icebear.me',
+		// target: "http://mock-api.com/GzqOxYnW.mock",
 		changeOrigin: true,
 		pathRewrite: {
 			'^/api': ''

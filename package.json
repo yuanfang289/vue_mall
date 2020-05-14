@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build"
+    "build": "vue-cli-service build",
+	"copy": "node copy_to_pc.js"
   },
   "dependencies": {
     "axios": "^0.19.2",

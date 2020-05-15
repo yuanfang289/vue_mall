@@ -112,6 +112,7 @@ export default {
   },
   created() {
 	    let _ = this;
+		_.receiveFailPopup('您来晚了，活动已结束～')
 		_.id = getUrlParam('id')||_.$route.query.id;
 		_.token = getUrlParam('token')||_.$route.query.token;
 		_.code = getUrlParam('code');
@@ -263,10 +264,11 @@ export default {
 	  _.sensors.track('Mini_College_ClickToUseCoupon', {
 	    'event_name': '点击去使用优惠券',
 	    'coupon_id': e.coupon_id,
+		'coupon_code':e.coupon_member_code,
 	    'button_name': '去使用',
 	  });
 	  
-	  let data = Object.assign({scence:scence,coupon_code:e.coupon_id},_.tokenObj)
+	  let data = Object.assign({scence:scence,coupon_code:e.coupon_member_code},_.tokenObj)
 	  _.$axios.post('/index/coupon_code/goto_use_code',data).then(
 	  	function (res) {
 			if(res.data.code){
@@ -289,6 +291,7 @@ export default {
 		    'event_name': '点击领取优惠券',
 			'activity_id': _.couponInfo.activity.id+'',
 		    'coupon_id': e.coupon_id+'',
+			'coupon_code':e.coupon_member_code+'',
 		    'button_name': '领取',
 		  });
 		   let data = Object.assign({activity_id:_.couponInfo.activity.id,coupon_id:e.coupon_id},_.tokenObj)

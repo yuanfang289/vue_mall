@@ -18,6 +18,10 @@ import SelectCoupon from '../pages/SelectCoupon'
 
 import UselessCoupon from '../pages/UselessCoupon'
 
+import Sell from '../pages/sell/Index'
+
+import SellMine from '../pages/sell/Mine'
+
 Vue.use(Router)
 
 export default new Router({
@@ -76,6 +80,21 @@ export default new Router({
 		meta:{
 		   title:'不可用优惠券'
 		}
+	},
+	{
+		path : '/sell',
+	    name : 'Sell',
+	    component :  Sell,
+		meta:{
+		   title:'分销课程'
+		},
+		children: [
+		        {
+		          path: 'mine',
+		          name: 'SellMine',
+		          component: SellMine
+		        }
+		]
 	}
 ],
     mode: "hash"

@@ -21,6 +21,7 @@ module.exports = {
 	  console.log("本地开发")
     } else {
       // 生产开发配置
+	  console.log("生产开发")
     }
  },
  // vue-loader 配置项
@@ -28,7 +29,7 @@ module.exports = {
  // vueLoader: {},
  
  // 生产环境是否生成 sourceMap 文件
- productionSourceMap: true,
+ productionSourceMap: false,
  // css相关配置 配置高于chainWebpack中关于css loader的配置
  css: {
   // 是否使用css分离插件 ExtractTextPlugin
@@ -38,7 +39,7 @@ module.exports = {
   // css预设器配置项
   loaderOptions: {},
   // 启用 CSS modules for all css / pre-processor files.
-  modules: false
+  requireModuleExtension: true
  },
  // use thread-loader for babel & TS in production build
  // enabled by default if the machine has more than 1 cores 构建时开启多进程处理babel编译

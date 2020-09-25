@@ -33,7 +33,6 @@
 <script>
 import { List } from 'vant';
 import { PullRefresh } from 'vant';
-import { Toast } from 'vant';
 export default {
   components: {  
 	 [List.name]: List,
@@ -92,7 +91,7 @@ export default {
 		  // 将 loading 设置为 true，表示处于加载状态
 		  _.loading = true;
 		  _.onLoad();
-		  Toast('刷新成功');
+		  _.$toast('刷新成功');
 		},
 		gosuccess(item){
 			let _ = this;
@@ -100,6 +99,7 @@ export default {
 			  name: 'Success',
 			  query:{           
 			    orderId:item.id, 
+			    distinct_id:_.localData("get","distinct_id")
 			  }
 			})
 		}

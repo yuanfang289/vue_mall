@@ -64,5 +64,15 @@
           return true;
       }
     };
+	
+	// 获取 cookies
+	const getCookie = function (name) {
+		/*
+		 * 参数说明：
+		 * name： 获取cookies的key值
+		 * */
+	    var v = window.document.cookie.match('(^|;) ?' + name + '=([^;]*)(;|$)');
+	    return v ? v[2] : null;
+	}
     
-    export {localData, sessionData}
+    export {localData, sessionData ,getCookie}

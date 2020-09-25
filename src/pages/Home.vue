@@ -10,13 +10,16 @@
 					<p>熊掌余额</p>
 					<div class="num">
 						<img class="paw_icon" src="https://oss.icebear.me/static/image/icon/paw_icon.png" />
-						<span>{{userInfo.paw_num}}</span>
+						<span class="score">{{userInfo.paw_num}}</span>
+						<router-link  :to="'/exlist?distinct_id='+distinct_id" class="duihuan">
+							<span style="margin-right: 2px;">兑换记录</span><van-icon name="arrow" />
+						</router-link>
 					</div>
 				</div>
 			</div>
-			<router-link  :to="'/exlist'" class="right">
-				<span style="margin-right: 2px;">兑换记录</span><van-icon name="arrow" />
-			</router-link>
+			<div class="right">
+				<button class="btn" @click="gotoBearCenter()">赚熊掌</button>
+			</div>
 		</div>
 		<!-- <van-pull-refresh v-model="refreshing" @refresh="onRefresh"> -->  <!-- :to="'/detail?id='+item.id" -->
 		  <van-list
@@ -26,26 +29,22 @@
 		    @load="getGoodsList"
 		  >
 		  <div class="list">
-			<template v-for="item in list">
-				<div class="item" @click="goDetail(item)">  
-					<img :src="item.pic_url" />
-					<div class="p">
-						<p>
-							{{item.name}}
-						</p>
-					</div>
-					<div class="price">
-						<img class="paw_icon" src="https://oss.icebear.me/static/image/icon/paw_icon.png"/>
-						<span>{{item.paw_price}}</span>
-					</div>
+			<div v-for="item in list" class="item" @click="goDetail(item)">  
+				<img :src="item.pic_url" />
+				<div class="p">
+					<p>
+						{{item.name}}
+					</p>
 				</div>
-			</template>
-			<template v-if="list.length==0">
-				<div class="nodata">
-				   <img :src="nodataimg"/>
-				   <p>今日商品已售馨，请明日再来~</p>
+				<div class="price">
+					<img class="paw_icon" src="https://oss.icebear.me/static/image/icon/paw_icon.png"/>
+					<span>{{item.paw_price}}</span>
 				</div>
-			</template>
+			</div>
+			<div v-if="list.length==0" class="nodata">
+			   <img :src="nodataimg"/>
+			   <p>今日商品已售馨，请明日再来~</p>
+			</div>
 		  </div>
 		  </van-list>
 		<!-- </van-pull-refresh> -->
@@ -55,7 +54,6 @@
 <script>
 	import { List } from 'vant';
 	import { PullRefresh } from 'vant';
-	import { Toast } from 'vant';
 	export default {
 		components: {
 			 [List.name]: List,
@@ -84,9 +82,11 @@
 	  created() {
 		let _ = this;
 		_.token = _.$route.query.token;
+		_.type = _.$route.query.type;
 		_.localData("set","token",_.token); 
-		// _.localData("set","icebearappid",_.$route.query.appid); 
-		_.getUserInfo()
+		_.distinct_id = _.$route.query.distinct_id;
+		_.localData("set","distinct_id",_.distinct_id); 
+		_.getUserInfo();
 	  },
 	  methods:{
 		getUserInfo(){  
@@ -124,22 +124,40 @@
 		  // 将 loading 设置为 true，表示处于加载状态
 		  this.loading = true;
 		  this.getGoodsList();
-		  Toast('刷新成功');
+		  this.$toast('刷新成功');
 		},
 		goDetail(item) {
-			console.log(item);
 			let _ = this;
-			let obj = {
-				clickName:'商品的点击',
-				data:item
-			}
-			_.wx.miniProgram.postMessage({ data: obj });
+			// 神策埋点：200421_点击查看商品详情
+			_.sensors.track('ClickViewProductDetail', {
+			  'event_name': '点击查看商品详情',
+			  'product_id': item.id,
+			  'product_name': item.name
+			});
 			_.$router.push({
 			  name: 'Detail',
 			  query:{           
 			    id:item.id, 
+				type:_.type||'',
+				distinct_id:_.localData("get","distinct_id")||''
 			  }
 			})
+		},
+		gotoBearCenter(){
+			let _ = this;
+			_.sensors.track("ClickButton",{
+			   event_name:'点击“赚熊掌”',
+			   button_name:'赚熊掌'
+			})
+			if(_.type) {
+				_.wx.miniProgram.switchTab({
+					url: '/pages/ucenter/bear_paw'
+				})
+			}else{
+			   _.wx.miniProgram.navigateTo({
+			   	url: '/pages/ucenter/bear_paw'
+			   })
+			} 
 		}
 	  }
 	}
@@ -185,23 +203,36 @@
 							  border-radius: 50%;
 							  margin-right: 0.04rem;
 						}
-						span{
+						.score{
 							  font-size: 0.56rem;
 							  font-weight: bold;
 							  color: #ff7211;
+						}
+						.duihuan{
+							height: 0.4rem;
+							line-height: 0.4rem;
+							font-family: PingFangSC;
+							font-size: 0.28rem;
+							color: #8e8e93;
+							display: flex;
+							align-items: center;
+							justify-content: center;
+							margin-left: 0.3rem;
 						}
 					}
 				}
 			}
 			.right{
-				  height: 0.4rem;
-				  line-height: 0.4rem;
-				  font-family: PingFangSC;
-				  font-size: 0.28rem;
-				  color: #8e8e93;
-				  display: flex;
-				  align-items: center;
-				  justify-content: center;
+				.btn{
+					height: 0.6rem;
+					text-align: center;
+					font-size: 0.24rem;
+					background: #9085E7;
+					color: #FFFFFF;
+					border-radius: 0.3rem;
+					padding: 0 0.3rem;
+					border: none;
+				}
 			}
 		}
 		.list{
@@ -210,6 +241,8 @@
 			align-items: center;
 			justify-content: space-between;
 			padding-top: 0.41rem;
+			padding-bottom: constant(safe-area-inset-bottom); /* 兼容 iOS < 11.2 */
+		  	padding-bottom: env(safe-area-inset-bottom); /* 兼容 iOS >= 11.2 */
 			.item{
 				width: 3.2rem;
 				height: 4.06rem;

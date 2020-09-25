@@ -1,0 +1,61 @@
+.van-overlay{
+    background-color: rgba(0, 0, 0, 0.4);
+}
+.van-dialog__message{
+	font-size: 18px;
+	font-weight: bold;
+    color: #482929; 
+    line-height: 1.5;
+    padding-top: 30px;
+    padding-bottom: 30px;
+}
+.van-button__text{
+    font-size: 0.36rem;
+}
+.van-dialog__footer--buttons{
+    border-top: 0.5px solid #ececec;
+}
+.van-dialog__cancel{
+    border-right: 0.5px solid #ececec!important;
+}
+.van-dialog__cancel .van-button__text{
+    color: #a4a4a4;
+}
+.van-dialog__confirm, .van-dialog__confirm{
+    font-weight: bold;
+}
+
+/* vip弹框样式 */
+.vip_dialog_confirm{
+	width: 6.22rem;
+}
+.vip_dialog_confirm .van-dialog__header{
+	padding-top: 0.4rem;
+	font-weight: bold;
+	font-size: 0.36rem;
+	color: #000000;
+}
+.vip_dialog_confirm .van-dialog__message{
+	padding: 0.32rem 0.6rem 0.4rem;
+	font-size: 0.32rem;
+	line-height: 0.44rem;
+	color: #575757;
+}
+.vip_dialog_confirm	.van-dialog__footer--buttons{
+	border-top: 0.5px solid transparent;
+}
+.vip_dialog_confirm .van-dialog__cancel {
+    border-right: 0.5px solid transparent;
+}
+.vip_dialog_confirm .van-hairline--top::after {
+    border-top-width: 0;
+}
+.vip_dialog_confirm .van-dialog__cancel {
+    border-right: 0.5px solid #e8e8e8!important;
+}
+.vip_dialog_confirm .van-button--large{
+	height: 1.14rem;
+}
+.vip_dialog_confirm .van-dialog__confirm .van-button__text{
+	color: #FF7211;
+}
